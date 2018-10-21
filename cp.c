@@ -20,21 +20,13 @@ void copy(FILE *src, FILE *dest);
 
 unsigned char print_progress = 1;
 
-int main(int argc, char **argv)
-{
-    printf("%d\n", argc);
-    int i;
-    for (i = 1; i < argc; i++) {
-        printf("%s\n", argv[i]);
-    }
-    puts("");
-
+int main(int argc, char **argv) {
     validate(argc, argv);
     //parse_args(argc, argv);
 
-    const char **dest = &(argv[argc - 1]);
-    const char dest_last = dest[strlen(*dest)];
-    const int dest_is_dir = is_dir(*dest);
+    const char *dest = argv[argc - 1];
+    const char dest_last = dest[strlen(dest)];
+    const int dest_is_dir = is_dir(dest);
 
     FILE *src_file, *dest_file;
     size_t file_index;
@@ -43,7 +35,7 @@ int main(int argc, char **argv)
 
         char *dest_fname;
         if (dest_is_dir) {
-            printf("last character of dest is %c\n", (*dest)[strlen(dest) - 1]);
+            printf("last character of dest is %c\n", dest[strlen(dest) - 1]);
             size_t dest_fname_size = strlen(dest_fname) + strlen(argv[file_index]);
             if (dest_last != '/') {
                 dest_fname_size++;
@@ -53,7 +45,7 @@ int main(int argc, char **argv)
                 FAIL("cp: an error occurred (failed to allocate memory for destination path)\n");
             }
             dest_fname[0] = '\0';
-            strcat(dest_fname, (*dest));
+            strcat(dest_fname, dest);
             if (dest_last != '/') {
                 strcat(dest_fname, "/");
             }
@@ -61,7 +53,7 @@ int main(int argc, char **argv)
             
         }
         else {
-            dest_fname = strdup(dest_fname);
+            dest_fname = strdup(dest);
             printf("%s\n", dest_fname);
         }
 
@@ -157,25 +149,24 @@ char *add_str(const char *str1, const char *str2) {
     return new_str;
 }
 
-void copy (FILE *src, FILE *dest) {
-    char progress[] = "----------------";
+void copy(FILE *src, FILE *dest) {
+    char progress_bar[] = "----------------";
+    int progress_index = 0;
+    double progress = 0;
     unsigned char byte;
     size_t src_size = fsize(src);
     printf("source file is %ld bytes long\n", src_size);
-    size_t counter;
+    size_t counter = 0;
     while (fread(&byte, sizeof(unsigned char), 1, src)) {
-        if (print_progress) {
-            //printf("[%s] : %s\r", progress, src_fname);
-            printf("[%s]\r", progress);
+        //printf("%d\n", (int)(progress * 15));
+        if (print_progress && (!counter || progress_index != (int)(progress * 15))) {
+            printf("%d\t", progress_index);
+            printf("[%s]\r", progress_bar);
+            fflush(stdout);
+            int progress_index = (int)(progress * 15);
+            progress_bar[progress_index] = '#';
         }
-        //printf("%c\n", byte);
-        //fwrite(&byte, sizeof(unsigned char), 1, dest);
-        if (print_progress) {
-            //printf("counter is %ld\nsrc_size is %ld\npercent is %lf\n", counter, src_size, (double)counter/(double)src_size);
-            //printf("counter index is %d\n", (int)(((double)counter/(double)src_size) * 15));
-            int progress_index = (int)(((double)counter/(double)src_size) * 15);
-            progress[progress_index] = '#';
-        }
+        progress = (double)counter/(double)src_size;
         counter++;
     }
 }

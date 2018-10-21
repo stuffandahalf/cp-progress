@@ -159,15 +159,17 @@ void copy(FILE *src, FILE *dest) {
     size_t counter = 0;
     while (fread(&byte, sizeof(unsigned char), 1, src)) {
         if (print_progress && (!counter || (progress_index != (int)(progress * 15)))) {
-            printf("[%s]\r", progress_bar);
+            printf("[%s]\t%ld / %ld\r", progress_bar, counter, src_size);
             fflush(stdout);
             progress_index = (int)(progress * 15);
             progress_bar[progress_index] = '#';
         }
         
         // Perform the copy here
+        fwrite(&byte, sizeof(unsigned char), 1, dest);
         
         progress = (double)counter/(double)src_size;
         counter++;
     }
+    puts("\ncomplete");
 }

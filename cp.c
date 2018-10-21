@@ -158,14 +158,15 @@ void copy(FILE *src, FILE *dest) {
     printf("source file is %ld bytes long\n", src_size);
     size_t counter = 0;
     while (fread(&byte, sizeof(unsigned char), 1, src)) {
-        //printf("%d\n", (int)(progress * 15));
-        if (print_progress && (!counter || progress_index != (int)(progress * 15))) {
-            printf("%d\t", progress_index);
+        if (print_progress && (!counter || (progress_index != (int)(progress * 15)))) {
             printf("[%s]\r", progress_bar);
             fflush(stdout);
-            int progress_index = (int)(progress * 15);
+            progress_index = (int)(progress * 15);
             progress_bar[progress_index] = '#';
         }
+        
+        // Perform the copy here
+        
         progress = (double)counter/(double)src_size;
         counter++;
     }
